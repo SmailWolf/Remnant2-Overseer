@@ -1,0 +1,46 @@
+<Application xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             x:Class="RemnantOverseer.App"
+             xmlns:local="using:RemnantOverseer"
+             RequestedThemeVariant="Dark">
+
+    <Application.DataTemplates>
+        <local:ViewLocator/>
+    </Application.DataTemplates>
+
+  <Application.Resources>
+    <!-- https://docs.avaloniaui.net/docs/guides/styles-and-resources/resources -->
+    <ResourceDictionary>
+      <ResourceDictionary.MergedDictionaries>
+        <ResourceInclude Source="/Styles/BaseColorsPalette.axaml"/>
+        <ResourceInclude Source="/Styles/BaseResources.axaml" />
+        <ResourceInclude Source="/Styles/IconResources.axaml" />
+        <ResourceInclude Source="/Styles/GenesisGlyphs.axaml" />
+
+        <ResourceInclude Source="avares://LoadingIndicators.Avalonia/LoadingIndicators.axaml" />
+
+        <!-- Why? -->
+        <!-- https://github.com/AvaloniaUI/Avalonia.Samples/blob/main/src/Avalonia.Samples/CustomControls/RatingControlSample/App.axaml -->
+        <ResourceInclude Source="/Controls/LoadingIndicator.axaml"/>
+      </ResourceDictionary.MergedDictionaries>
+    </ResourceDictionary>
+
+    <FontFamily x:Key="ContentControlThemeFontFamily">fonts:Montserrat#Montserrat, $Default</FontFamily>
+  </Application.Resources>
+
+    <Application.Styles>
+        <FluentTheme>
+          <!-- What? -->
+          <!-- https://docs.avaloniaui.net/docs/basics/user-interface/styling/themes/fluent#creating-custom-color-palettes; https://theme.xaml.live -->
+          <!-- Look up default brush names here: https://github.com/AvaloniaUI/Avalonia/blob/master/src/Avalonia.Themes.Fluent/Accents/FluentControlResources.xaml-->
+          <FluentTheme.Palettes>
+            <ColorPaletteResources x:Key="Dark"
+              Accent="{StaticResource BaseAccentColor}"
+              BaseHigh="{StaticResource BaseTextColor}"
+              RegionColor="{StaticResource GlobalBackroundColor}"
+              />
+          </FluentTheme.Palettes>
+        </FluentTheme>
+      <StyleInclude Source="/Styles/AppDefaultStyles.axaml" />
+    </Application.Styles>
+</Application>

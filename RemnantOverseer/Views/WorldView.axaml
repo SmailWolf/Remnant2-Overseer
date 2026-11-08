@@ -1,0 +1,382 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:sys="clr-namespace:System;assembly=System.Runtime"
+             xmlns:vm="using:RemnantOverseer.ViewModels"
+             xmlns:local="using:RemnantOverseer"
+             xmlns:models="using:RemnantOverseer.Models"
+             xmlns:controls="using:RemnantOverseer.Controls"
+             xmlns:util="using:RemnantOverseer.Utilities"
+             xmlns:loc="using:RemnantOverseer.Services"
+             mc:Ignorable="d" d:DesignWidth="1200" d:DesignHeight="800"
+             x:Class="RemnantOverseer.Views.WorldView"
+             x:DataType="vm:WorldViewModel">
+
+  <UserControl.Resources>
+    <util:ItemTypeToIconConverter x:Key="ItemTypeToIconConverter" />
+    <util:StringComparisonConverter x:Key="StringComparisonConverter" />
+    <sys:Double x:Key="IconSize">20</sys:Double>
+    <!-- Preload -->
+    <Bitmap x:Key="ToolkitImg">/Assets/Images/toolkit-logo.png</Bitmap>
+  </UserControl.Resources>
+
+  <Grid Name="OverlayGrid">
+      <!-- Location selection and item tree -->
+      <Grid Name="ContentGrid" RowDefinitions="Auto, *" Margin="5">
+
+        <!-- Completion Icon -->
+        <!--<StackPanel Grid.Row="1" Orientation="Vertical" IsVisible="" VerticalAlignment="Center">
+          <PathIcon Height="150" Width="150" Margin="0 0 0 20"
+                    Foreground="{StaticResource BaseTextColor}"
+                    Data="{StaticResource FinishedIcon}" HorizontalAlignment="Center"/>
+          <TextBlock Text="Nothing left to collect" FontSize="30" HorizontalAlignment="Center"/>
+        </StackPanel>-->
+
+        <!-- Top ribbon -->
+        <Grid Grid.Row="0" Background="Transparent" ColumnDefinitions="Auto, Auto, *, Auto" Margin="10">
+          <Grid.Styles>
+            <Style Selector="TextBlock">
+              <Setter Property="FontSize" Value="16" />
+            </Style>
+            <Style Selector="Button /template/ ContentPresenter">
+              <Setter Property="FontSize" Value="16" />
+            </Style>
+            <Style Selector="Button, ToggleButton">
+              <Setter Property="Margin" Value="0 0 10 0" />
+            </Style>
+          </Grid.Styles>
+
+          <StackPanel Grid.Column="0" Orientation="Horizontal" >
+            <ComboBox SelectedIndex="{Binding SelectedModeIndex, Mode=TwoWay}" MinWidth="165" ToolTip.Tip="Виберіть режим гри">
+              <ComboBoxItem Content="Кампанія" />
+              <ComboBoxItem Content="Пригода" />
+              <ComboBoxItem Content="Boss Rush" />
+            </ComboBox>
+          </StackPanel>
+
+          <!-- Quick filters -->
+          <StackPanel Grid.Column="1" Orientation="Horizontal" IsVisible="{Binding IsRegularWorldSelected}">
+            <!-- Could just make them radios honestly. But I have no time nor desire to style them -->
+            <ToggleButton IsVisible="{Binding IsCampaignSelected}" IsChecked="{Binding IsNerudFilterChecked}" Command="{Binding NerudFilterToggledCommand}">
+              <!-- This is a secret tool that will help us later: CommandParameter="{Binding $self.IsChecked}" -->
+              <Grid ColumnDefinitions="Auto, *">
+                <PathIcon Grid.Column="0" Data="{StaticResource NerudIcon}" Width="18" Margin="5 0"/>
+                <TextBlock Grid.Column="1" Text="{loc:Loc World_FilterNerud}" Margin="0 0 5 0"/>
+              </Grid>
+            </ToggleButton>
+            <ToggleButton IsVisible="{Binding IsCampaignSelected}" IsChecked="{Binding IsYaeshaFilterChecked}" Command="{Binding YaeshaFilterToggledCommand}">
+              <Grid ColumnDefinitions="Auto, *">
+                <PathIcon Grid.Column="0" Data="{StaticResource YaeshaIcon}" Width="18" Margin="5 0"/>
+                <TextBlock Grid.Column="1" Text="{loc:Loc World_FilterYaesha}" Margin="0 0 5 0"/>
+              </Grid>
+            </ToggleButton>
+            <ToggleButton IsVisible="{Binding IsCampaignSelected}" IsChecked="{Binding IsLosomnFilterChecked}" Command="{Binding LosomnFilterToggledCommand}">
+              <Grid ColumnDefinitions="Auto, *">
+                <PathIcon Grid.Column="0" Data="{StaticResource LosomnIcon}" Width="18" Margin="5 0"/>
+                <TextBlock Grid.Column="1" Text="{loc:Loc World_FilterLosomn}" Margin="0 0 5 0"/>
+              </Grid>
+            </ToggleButton>
+
+            <Button Command="{Binding ExpandTreeNodesCommand}">
+              <Grid ColumnDefinitions="Auto, *">
+              <PathIcon Grid.Column="0" Data="{StaticResource SquareMinusIcon}" IsVisible="{Binding IsGlobalExpandOn}" Width="14" Margin="5 0"/>
+              <PathIcon Grid.Column="0" Data="{StaticResource SquarePlusIcon}" IsVisible="{Binding !IsGlobalExpandOn}" Width="14" Margin="5 0"/>
+              <TextBlock Grid.Column="1" Text="{loc:Loc Common_CollapseAll}" IsVisible="{Binding IsGlobalExpandOn}" Margin="0 0 5 0"/>
+              <TextBlock Grid.Column="1" Text="{loc:Loc Common_ExpandAll}" IsVisible="{Binding !IsGlobalExpandOn}" Margin="0 0 5 0"/>
+              </Grid>
+            </Button>
+          </StackPanel>
+
+          <Grid Grid.Column="3" ColumnDefinitions="Auto, Auto, Auto *" IsVisible="{Binding IsRegularWorldSelected}">
+            <ToggleButton Grid.Column="0" IsChecked="{Binding HideDuplicates}">
+              <ToolTip.Tip>
+                <Panel>
+                <TextBlock IsVisible="{Binding HideDuplicates}" Text="{loc:Loc World_ToggleDuplicatesHiding}" />
+                <TextBlock IsVisible="{Binding !HideDuplicates}" Text="{loc:Loc World_ToggleDuplicatesShowing}" />
+                </Panel>
+              </ToolTip.Tip>
+              <Grid ColumnDefinitions="Auto">
+                <PathIcon Data="{StaticResource HidingDuplicatesIcon}" IsVisible="{Binding HideDuplicates}" Width="14" Margin="5 0"/>
+                <PathIcon Data="{StaticResource ShowingDuplicatesIcon}" IsVisible="{Binding !HideDuplicates}" Width="14" Margin="5 0"/>
+              </Grid>
+            </ToggleButton>
+            <Button Grid.Column="1" PointerPressed="FiltersButton_PointerPressed" ToolTip.Tip="{loc:Loc World_MoreFilters}">
+              <Grid ColumnDefinitions="Auto">
+                <PathIcon Grid.Column="0" Data="{StaticResource FiltersIcon}" Width="14" Margin="5 0"/>
+              </Grid>
+              <Button.Flyout>
+                <Flyout Placement="Bottom" VerticalOffset="5">
+                  <StackPanel Spacing="5">
+                    <StackPanel.Styles>
+                      <Style Selector="ToggleButton">
+                        <Setter Property="HorizontalAlignment" Value="Stretch"/>
+                        <Setter Property="Margin" Value="0"/>
+                      </Style>
+                      <Style Selector="ToggleButton /template/ ContentPresenter">
+                        <Setter Property="FontSize" Value="14"/>
+                      </Style>
+                      <Style Selector="ToggleButton TextBlock">
+                        <Setter Property="FontSize" Value="14"/>
+                      </Style>
+                    </StackPanel.Styles>
+                    <CheckBox IsChecked="{Binding !HideLootedItems}" Content="{loc:Loc World_FilterLootedItems}"/>
+                    <CheckBox IsChecked="{Binding !HideMissingPrerequisiteItems}" Content="{loc:Loc World_FilterMissingPrerequisites}"/>
+                    <CheckBox IsChecked="{Binding !HideHasRequiredMaterialItems}" Content="{loc:Loc World_FilterUncraftedWithRequiredMaterial}" />
+                  </StackPanel>
+                </Flyout>
+              </Button.Flyout>
+            </Button>
+            <Button Grid.Column="2"  Command="{Binding ResetFiltersCommand}" ToolTip.Tip="{loc:Loc Common_ResetFilters}">
+              <Grid ColumnDefinitions="Auto">
+                <PathIcon Grid.Column="0" Data="{StaticResource ResetIcon}" Width="14" Margin="5 0"/>
+              </Grid>
+            </Button>
+            <TextBox Grid.Column="3" Name="FilterBox" Text="{Binding FilterText}" MinWidth="250" MaxWidth="450" PlaceholderText="{loc:Loc Common_SearchWatermark}" ToolTip.Tip="{loc:Loc Common_SearchTooltip}" />
+          </Grid>
+        </Grid>
+
+        <Border Grid.Row="1" IsVisible="{Binding IsBossRushSelected}" Background="#202630" CornerRadius="8" Padding="24" Margin="10" VerticalAlignment="Top" MaxWidth="800" HorizontalAlignment="Left">
+          <StackPanel Spacing="10">
+            <TextBlock Text="Boss Rush" FontSize="23" FontWeight="Bold" />
+            <TextBlock Text="Аналіз поточного забігу поки не підтримується." FontSize="16" TextWrapping="Wrap" />
+            <TextBlock Text="Дані про згенерованих босів ще не перевірені. Кампанія та пригода залишаються доступними у списку режимів." TextWrapping="Wrap" Opacity="0.8" />
+          </StackPanel>
+        </Border>
+        <!-- Items -->
+        <TreeView Grid.Row="1" IsVisible="{Binding IsRegularWorldSelected}" ItemsSource="{Binding FilteredZones}" ScrollViewer.AllowAutoHide="False" ScrollViewer.VerticalScrollBarVisibility="Visible">
+          <TreeView.Styles>
+            <Style Selector="ToggleButton#PART_ExpandCollapseChevron">
+              <Style Selector="^:not(:checked) /template/ Path#ChevronPath">
+                <Setter Property="Data" Value="{StaticResource SquarePlusIcon}" />
+              </Style>
+              <Style Selector="^:checked /template/ Path#ChevronPath">
+                <Setter Property="Data" Value="{StaticResource SquareMinusIcon}" />
+              </Style>
+            </Style>
+            <Style Selector="TextBlock">
+              <Setter Property="FontSize" Value="16" />
+            </Style>
+            <Style Selector="PathIcon">
+              <Setter Property="Height" Value="{StaticResource IconSize}" />
+              <Setter Property="Width" Value="{StaticResource IconSize}" />
+            </Style>
+            <Style Selector="PathIcon:disabled">
+              <Setter Property="Foreground" Value="{StaticResource BaseTextDisabledColor}" />
+              <Setter Property="Opacity" Value="0.5" />
+            </Style>
+            <Style Selector="Button.hint">
+              <Setter Property="Height" Value="{StaticResource IconSize}" />
+              <Setter Property="Width" Value="{StaticResource IconSize}" />
+              <Setter Property="Opacity" Value="0.5" />
+              <Setter Property="Background" Value="Transparent" />
+              <Style Selector="^:pointerover">
+                <Setter Property="Opacity" Value="1" />
+              </Style>
+              <Style Selector="^:pointerover /template/ ContentPresenter">
+                <Setter Property="Background" Value="Transparent" />
+              </Style>
+              <Style Selector="^:pressed /template/ ContentPresenter">
+                <Setter Property="Background" Value="Transparent" />
+              </Style>
+              <Setter Property="Transitions">
+                <Transitions>
+                  <DoubleTransition Property="Opacity" Duration="0:0:0.125" />
+                </Transitions>
+              </Setter>
+            </Style>
+          </TreeView.Styles>
+          <TreeView.DataTemplates>
+            <TreeDataTemplate DataType="models:Zone" ItemsSource="{Binding Locations}">
+              <StackPanel Orientation="Horizontal">
+                <TextBlock Margin="5,0,0,0"  Text="{Binding Name}" />
+                <PathIcon Data="{StaticResource BloodmoonIcon}" Foreground="{StaticResource BloodmoonColor}" ToolTip.Tip="{Binding $parent[TreeView].((vm:WorldViewModel)DataContext).BloodmoonTooltip}" PointerEntered="BloodmoonIcon_PointerEntered" Margin="5 0" Height="16">
+                  <PathIcon.IsVisible>
+                    <MultiBinding Converter="{x:Static BoolConverters.And}">
+                      <Binding Path="CanonicalName" Converter="{StaticResource StringComparisonConverter}" ConverterParameter="{x:Static util:LocationStrings.Yaesha}" Mode="OneWay" />
+                      <Binding Path="!$parent[TreeView].((vm:WorldViewModel)DataContext).BloodmoonChance" Converter="{x:Static ObjectConverters.IsNotNull}" Mode="OneWay" />
+                    </MultiBinding>
+                  </PathIcon.IsVisible>
+                </PathIcon>
+              </StackPanel>
+            </TreeDataTemplate>
+
+            <TreeDataTemplate DataType="models:Location" ItemsSource="{Binding Items}">
+              <Grid ColumnDefinitions="Auto, Auto, *">
+                <Grid Grid.Column="0" ColumnDefinitions="*, Auto">
+                  <TextBlock Grid.Column="0" Margin="5,0,5,0" Text="{Binding Name}"/>
+                  <!-- Need to map 131 files for this to work :( -->
+                  <!--<PathIcon Grid.Column="1" Data="{StaticResource ImageIcon}" Margin="5 0"/>-->
+                </Grid>
+                <Grid Grid.Column="1" ColumnDefinitions="Auto, Auto, Auto, Auto, Auto">
+                  <PathIcon Grid.Column="0" Data="{StaticResource ConnectionsIcon}" IsVisible="{Binding HasConnections}" ToolTip.Tip="{Binding FormattedConnections}" Margin="5 0"/>
+                  <PathIcon Grid.Column="1" Data="{StaticResource TraitBookIcon}" IsVisible="{Binding IsTraitBookPresent}" IsEnabled="{Binding !IsTraitBookLooted}" ToolTip.Tip="{loc:Loc World_TraitBookAvailable}" Margin="5 0"/>
+                  <PathIcon Grid.Column="2" Data="{StaticResource SimulacrumIcon2}" IsVisible="{Binding IsSimulacrumPresent}" IsEnabled="{Binding !IsSimulacrumLooted}" ToolTip.Tip="{loc:Loc World_SimulacrumAvailable}" Margin="5 0"/>
+                  <PathIcon Grid.Column="3" Data="{StaticResource CurrentLocationIcon}" IsVisible="{Binding IsRespawnLocation}" Foreground="{StaticResource ZoneTransitionColor}" ToolTip.Tip="{Binding FormattedRespawnPointName}" Margin="5 0"/>
+
+                  <!-- Hints -->
+                  <Button Classes="hint" Grid.Column="4" Margin="5 0" ToolTip.Tip="{loc:Loc Hint_Genesis}" Click="GenesisHintButton_Click">
+                    <Button.IsVisible>
+                      <MultiBinding Converter="{x:Static BoolConverters.And}">
+                        <Binding Path="IsGenesisLocation" Mode="OneWay" />
+                        <Binding Path="!$parent[TreeView].((vm:WorldViewModel)DataContext).HideTips" Mode="OneWay" />
+                      </MultiBinding>
+                    </Button.IsVisible>
+                    <PathIcon Data="{StaticResource LocationSecretIcon}" Foreground="{StaticResource RequiredGlyphColor}"/>
+                  </Button>
+                  <Button Classes="hint" Grid.Column="4" Margin="5 0" ToolTip.Tip="{loc:Loc Hint_ThaenTree}" Click="ThaenHintButton_Click">
+                    <Button.IsVisible>
+                      <MultiBinding Converter="{x:Static BoolConverters.And}">
+                        <Binding Path="IsWard13Location" Mode="OneWay" />
+                        <Binding Path="!$parent[TreeView].((vm:WorldViewModel)DataContext).HideTips" Mode="OneWay" />
+                      </MultiBinding>
+                    </Button.IsVisible>
+                    <PathIcon Data="{StaticResource LocationSecretIcon}" Foreground="{StaticResource ThaenFruitColor}"/>
+                  </Button>
+                  <Button Classes="hint" Grid.Column="4" Margin="5 0" ToolTip.Tip="{loc:Loc Hint_OraclesQuilt}" Click="QuiltHintButton_Click">
+                    <Button.IsVisible>
+                      <MultiBinding Converter="{x:Static BoolConverters.And}">
+                        <Binding Path="IsOracleLocation" Mode="OneWay" />
+                        <Binding Path="!$parent[TreeView].((vm:WorldViewModel)DataContext).HideTips" Mode="OneWay" />
+                      </MultiBinding>
+                    </Button.IsVisible>
+                    <PathIcon Data="{StaticResource LocationSecretIcon}" Foreground="{StaticResource QuiltBorderColor}"/>
+                  </Button>
+                </Grid>
+              </Grid>
+            </TreeDataTemplate>
+
+            <TreeDataTemplate DataType="models:Item">
+              <Grid ColumnDefinitions="Auto, Auto, *, Auto, 190">
+                <!-- Col 4: 20*2 + (5*2 + 20)*5 -->
+                <Grid.Styles>
+                  <Style Selector="TextBlock:disabled">
+                    <Setter Property="Foreground" Value="{StaticResource BaseTextDisabledColor}" />
+                  </Style>
+                </Grid.Styles>
+                <!-- Could put these two in a container -->
+                <PathIcon Grid.Column="0" Height="20" Width="20" Margin="0 0 10 0"
+                          Data="{Binding Type, Converter={StaticResource ItemTypeToIconConverter}}"
+                          ToolTip.Tip="{Binding TypeName}"
+                          IsVisible="{Binding !HasThumbnail}"
+                          IsEnabled="{Binding !IsLooted}"/>
+
+                <Image Grid.Column="0" Source="{Binding Thumbnail}" Width="40" Height="40" Margin="0 0 8 0" Stretch="Uniform" />
+                <Grid Grid.Column="1" ColumnDefinitions="Auto, Auto" RowDefinitions="Auto, Auto">
+                  <HyperlinkButton Classes="plain" Grid.Column="0" NavigateUri="{Binding WikiLink}" Margin="0" Padding="3 0">
+                    <TextBlock Text="{Binding Name}">
+                      <TextBlock.IsEnabled>
+                        <MultiBinding Converter="{x:Static BoolConverters.And}">
+                          <Binding Path="!IsLooted" />
+                          <Binding Path="!IsPrerequisiteMissing" />
+                        </MultiBinding>
+                      </TextBlock.IsEnabled>
+                    </TextBlock>
+                    <ToolTip.Tip>
+                      <StackPanel Orientation="Vertical">
+                        <TextBlock Text="{loc:Loc Item_CannotBeLootedPrerequisites}" Margin="0 0 0 10"
+                                   IsVisible="{Binding IsPrerequisiteMissing}"/>
+                        <TextBlock Text="{loc:Loc Item_CannotBeLootedWorldState}" Margin="0 0 0 10">
+                          <TextBlock.IsVisible>
+                            <MultiBinding Converter="{x:Static BoolConverters.And}">
+                              <Binding  Path="IsLooted" />
+                              <Binding Path="!IsPrerequisiteMissing" />
+                            </MultiBinding>
+                          </TextBlock.IsVisible>
+                        </TextBlock>
+                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                          <PathIcon Height="16" Width="16" Margin="0 0 3 0" Data="{StaticResource RemnantWikiIcon}"/>
+                          <TextBlock FontSize="12" TextDecorations="{x:Null}" Text="{loc:Loc Item_ClickWiki}"/>
+                        </StackPanel>
+                      </StackPanel>
+                    </ToolTip.Tip>
+                  </HyperlinkButton>
+                  <Expander Grid.Row="1" Grid.Column="0" Header="Де знайти й умови" MaxWidth="560" HorizontalAlignment="Left">
+                    <StackPanel Spacing="3" Margin="4 4 0 10">
+                      <TextBlock Text="{Binding PlaceDetails}" TextWrapping="Wrap" />
+                      <TextBlock Text="{Binding OriginDetails}" TextWrapping="Wrap" />
+                      <TextBlock Text="{Binding HowToObtain}" TextWrapping="Wrap" />
+                      <TextBlock Text="Автоматичний переклад ще не перевірений і може містити помилки. Звіряйте з оригіналом." IsVisible="{Binding HasUnreviewedTranslation}" TextWrapping="Wrap" Opacity="0.7" />
+                      <Expander Header="Оригінал англійською"><TextBlock Text="{Binding OriginalHowToObtain}" TextWrapping="Wrap" MaxWidth="540" /></Expander>
+                      <TextBlock Text="Наявність у списку — можлива нагорода; умови можуть бути не виконані." TextWrapping="Wrap" Opacity="0.75" />
+                    </StackPanel>
+                  </Expander>
+                </Grid>
+
+                <!-- Column 2 is reserved for spacing-->
+
+                <Grid Grid.Column="3" ColumnDefinitions="Auto, *" Width="350" IsVisible="{Binding OriginNameFormatted, Converter={x:Static StringConverters.IsNotNullOrEmpty}}" >
+                  <PathIcon Grid.Column="0" Margin="10 0 10 0" Data="{StaticResource InjectableIcon}" Height="{StaticResource IconSize}" Width="{StaticResource IconSize}" VerticalAlignment="Center"/>
+                  <controls:TextBlockWithTipWhenEllipsized Grid.Column="1" Text="{Binding OriginNameFormatted}" TextWrapping="NoWrap" TextTrimming="CharacterEllipsis" VerticalAlignment="Center" />
+                </Grid>
+
+                <Grid Grid.Column="4" Margin="20 0 20 0" ColumnDefinitions="*,*,*,*,*">
+                  <Grid.Styles>
+                    <Style Selector="PathIcon">
+                      <Setter Property="Height" Value="{StaticResource IconSize}" />
+                      <Setter Property="Width" Value="{StaticResource IconSize}" />
+                      <Setter Property="Margin" Value="5 0" />
+                      <Setter Property="Foreground" Value="{StaticResource BaseTextColor}" />
+                    </Style>
+                  </Grid.Styles>
+                  <!-- consider always showing icons, but very faint if not applicable for layout consistency -->
+                  <!--<PathIcon Height="{StaticResource IconSize}" Width="{StaticResource IconSize}" Margin="5 0" Foreground="{StaticResource BaseTextColor}" Data="{StaticResource CoopIcon}"/>-->
+                  
+                  <!-- These two are mutualy exclusive -->
+                  <Panel Grid.Column="0">
+                    <HyperlinkButton Classes="plain" Margin="0" Padding="0" NavigateUri="{Binding NoteTranslationLink}" IsVisible="{Binding HasNoteTranslationLink}">
+                      <PathIcon Data="{StaticResource RoundInfoIcon}"/>
+                      <ToolTip.Placement>LeftEdgeAlignedTop</ToolTip.Placement>
+                      <ToolTip.Tip>
+                        <StackPanel Orientation="Vertical">
+                          <TextBlock TextDecorations="{x:Null}" Margin="0 0 0 5" Text="{loc:Loc Item_ClickTranslateNote}"/>
+                          <Border Classes="toolTipDivider" />
+                          <TextBlock TextDecorations="{x:Null}" Text="{Binding Description}" TextWrapping="Wrap" MaxWidth="450"/>
+                        </StackPanel>
+                      </ToolTip.Tip>
+                    </HyperlinkButton>
+                    <PathIcon Data="{StaticResource RoundInfoIcon}" IsVisible="{Binding HasPlainDescriptionIcon}" ToolTip.Tip="{Binding Description}" ToolTip.Placement="LeftEdgeAlignedTop"/>
+                  </Panel>
+
+                  <HyperlinkButton Grid.Column="1" Classes="plain" Margin="5 0" Padding="0" NavigateUri="{Binding ToolkitLink}">
+                    <HyperlinkButton.IsVisible>
+                      <MultiBinding Converter="{x:Static BoolConverters.And}">
+                        <Binding Path="ToolkitLink" Converter="{x:Static StringConverters.IsNotNullOrEmpty}" Mode="OneWay" />
+                        <Binding Path="!$parent[TreeView].((vm:WorldViewModel)DataContext).HideToolkitLinks" Mode="OneWay" />
+                      </MultiBinding>
+                    </HyperlinkButton.IsVisible>
+                    <Image Source="{StaticResource ToolkitImg}" Height="20" Width="20" RenderOptions.BitmapInterpolationMode="MediumQuality">
+                    </Image>
+                    <ToolTip.Placement>LeftEdgeAlignedTop</ToolTip.Placement>
+                    <ToolTip.Tip>
+                      <StackPanel Orientation="Vertical">
+                        <TextBlock TextDecorations="{x:Null}" Margin="0 0 0 5" Text="{loc:Loc Item_ClickToolkit}"/>
+                        <Border Classes="toolTipDivider" />
+                        <TextBlock FontSize="12" TextDecorations="{x:Null}" Text="{Binding ToolkitLink}"/>
+                      </StackPanel>
+                    </ToolTip.Tip>
+                  </HyperlinkButton>
+                  <PathIcon Grid.Column="2" Data="{StaticResource CoopIcon}" IsVisible="{Binding IsCoop}" ToolTip.Tip="{loc:Loc Item_CoopRequired}" ToolTip.Placement="LeftEdgeAlignedTop"/>
+                  <PathIcon Grid.Column="3" Data="{StaticResource CassShopIcon}" IsVisible="{Binding IsInCassShop}" ToolTip.Tip="{loc:Loc Item_InCassShop}" ToolTip.Placement="LeftEdgeAlignedTop"/>
+                  <PathIcon Grid.Column="4" Data="{StaticResource AccountAwardIcon}" IsVisible="{Binding IsAccountAward}" ToolTip.Tip="{loc:Loc Item_AccountWideUnlock}" ToolTip.Placement="LeftEdgeAlignedTop"/>
+                </Grid>
+              </Grid>
+            </TreeDataTemplate>
+          </TreeView.DataTemplates>
+
+          <!-- Why? -->
+          <!-- https://stackoverflow.com/questions/77275239/how-to-properly-expand-a-treeviewitem-in-avalonia -->
+          <TreeView.ItemContainerTheme>
+            <ControlTheme TargetType="TreeViewItem" BasedOn="{StaticResource {x:Type TreeViewItem}}">
+              <!-- Why? -->
+              <!-- https://docs.avaloniaui.net/docs/guides/data-binding/binding-to-controls -->
+              <!-- Consider doing per item in the future https://github.com/AvaloniaUI/Avalonia/discussions/13903 -->
+              <Setter Property="IsExpanded" Value="{Binding $parent[TreeView].((vm:WorldViewModel)DataContext).IsGlobalExpandOn, Mode=OneWay}" />
+            </ControlTheme>
+          </TreeView.ItemContainerTheme>
+
+        </TreeView>
+      </Grid>
+    <controls:LoadingIndicator IsLoading="{Binding IsLoading}"/>
+  </Grid>
+</UserControl>

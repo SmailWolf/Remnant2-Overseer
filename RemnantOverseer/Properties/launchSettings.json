@@ -1,0 +1,10 @@
+{
+  "profiles": {
+    "RemnantOverseer": {
+      "commandName": "Project",
+      "environmentVariables": {
+        "DEBUG_REMNANT_FOLDER_": "D:\\Projects\\Games\\_testData\\Remnant\\Main"
+      }
+    }
+  }
+}

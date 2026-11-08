@@ -1,0 +1,195 @@
+﻿using Avalonia.Input.Platform;
+using RemnantOverseer.Models.Messages;
+using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Input;
+using CommunityToolkit.Mvvm.Messaging;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using RemnantOverseer.Services;
+using RemnantOverseer.Utilities;
+using System.Collections.ObjectModel;
+using RemnantOverseer.Models;
+using System.Reactive.Subjects;
+using System.Reactive.Linq;
+
+namespace RemnantOverseer.ViewModels;
+public partial class MissingItemsViewModel : ViewModelBase
+{
+    private readonly SaveDataService _saveDataService;
+    private readonly StateService _stateService;
+    private MappedMissingItems _mappedMissingItems = new();
+    private readonly Subject<string?> _filterTextSubject = new Subject<string?>();
+
+    private int _selectedCharacterIndex = -1;
+
+    [ObservableProperty]
+    private bool _isLoading = false;
+
+    [ObservableProperty]
+    private string? _filterText = null;
+
+    [ObservableProperty]
+    private ObservableCollection<ItemCategory> _filteredItemCategories = [];
+
+    [ObservableProperty]
+    private bool _isGlobalExpandOn = true;
+
+    public MissingItemsViewModel(SaveDataService saveDataService, StateService stateService)
+    {
+        _saveDataService = saveDataService;
+        _stateService = stateService;
+        _filterTextSubject
+          .Throttle(TimeSpan.FromMilliseconds(400))
+          .Subscribe(OnFilterTextChangedDebounced);
+
+        // Set the flag until after onLoaded is executed
+        IsLoading = true;
+    }
+
+    public void OnViewLoaded()
+    {
+        if (IsInitialized) { return; }
+
+        Task.Run(async () =>
+        {
+            if (_stateService.SelectedCharacterIndex != null)
+            {
+                _selectedCharacterIndex = _stateService.SelectedCharacterIndex.Value;
+                await ReadSave();
+            }
+            else
+            {
+                await ReadSave(true);
+            }
+            IsActive = true;
+            IsInitialized = true;
+        });
+    }
+
+    [RelayCommand]
+    private void ExpandTreeNodes()
+    {
+        IsGlobalExpandOn = !IsGlobalExpandOn;
+    }
+
+    partial void OnFilterTextChanged(string? value)
+    {
+        _filterTextSubject.OnNext(value);
+    }
+    private void OnFilterTextChangedDebounced(string? value)
+    {
+        ApplyFilter(value);
+    }
+
+    [RelayCommand]
+    public void ResetFilters()
+    {
+        FilterText = null;
+    }
+
+    public async Task CopyToClipboardAsync(IClipboard clipboard)
+    {
+        if (FilteredItemCategories.Count == 0) return;
+
+        var sb = new StringBuilder();
+        foreach (var category in FilteredItemCategories)
+        {
+            sb.AppendLine($"- {category.Name}");
+            foreach (var item in category.Items)
+            {
+                sb.AppendLine($"  - {item.Name}");
+            }
+        }
+
+        await clipboard.SetTextAsync(sb.ToString().TrimEnd());
+        Messenger.Send(new NotificationInfoMessage(NotificationStrings.MissingItemsCopiedToClipboard));
+    }
+
+    private async Task ReadSave(bool resetActiveCahracter = false)
+    {
+        IsLoading = true;
+
+        var dataset = await _saveDataService.GetSaveData();
+        if (dataset == null)
+        {
+            IsLoading = false;
+            return;
+        }
+
+        if (resetActiveCahracter)
+        {
+            _selectedCharacterIndex = DatasetMapper.GetActiveCharacterIndex(dataset);
+            // Call private field to avoid filtering on every assignment
+#pragma warning disable MVVMTK0034 // Direct field reference to [ObservableProperty] backing field
+            _filterText = null;
+#pragma warning restore MVVMTK0034 // Direct field reference to [ObservableProperty] backing field
+            OnPropertyChanged(nameof(FilterText));
+        }
+
+        var character = dataset.Characters[_selectedCharacterIndex];
+        _mappedMissingItems = DatasetMapper.MapMissingItems(
+            character.Profile.MissingItems,
+            character.Save.CassShop.Select(x => x.Id));
+
+        ApplyFilter();
+
+        IsLoading = false;
+    }
+
+    private async Task CharacterUpdatedHandler(int characerIndex)
+    {
+        _selectedCharacterIndex = characerIndex;
+        await ReadSave(false);
+    }
+
+    private void ApplyFilter()
+    {
+        ApplyFilter(FilterText);
+    }
+
+    private void ApplyFilter(string? value)
+    {
+        var tempFiltered = new List<ItemCategory>();
+        foreach (var mappedCategory in _mappedMissingItems.ItemCategoryList)
+        {
+            if (mappedCategory.Type == Models.Enums.ItemTypes.Unknown) continue;
+
+            var tempCategory = mappedCategory.ShallowCopy();
+            tempCategory.Items = [];
+            List<Item> tempItems = [];
+            if (!string.IsNullOrEmpty(value))
+            {
+                tempItems = mappedCategory.Items.Where(i => i.Name.Contains(value, StringComparison.OrdinalIgnoreCase)).ToList();
+            }
+            else
+            {
+                tempItems.AddRange(mappedCategory.Items);
+            }
+            if (tempItems.Count != 0) { tempCategory.Items = tempItems; tempFiltered.Add(tempCategory); }
+        }
+
+        FilteredItemCategories = new(tempFiltered);
+    }
+
+    #region Messages
+    protected override void OnActivated()
+    {
+        Messenger.Register<MissingItemsViewModel, CharacterSelectChangedMessage>(this, (r, m) => {
+            IsLoading = true; // Look into it later, sometimes task starts just a moment too late and the old stuff still can be seen
+            Task.Run(async () => await CharacterUpdatedHandler(m.Value));
+        });
+
+        Messenger.Register<MissingItemsViewModel, SaveFileChangedMessage>(this, (r, m) => {
+            IsLoading = true;
+            Task.Run(async () => await ReadSave(m.CharacterCountChanged));
+        });
+
+        Messenger.Register<MissingItemsViewModel, CultureChangedMessage>(this, (r, m) => {
+            r.ApplyFilter();
+        });
+    }
+    #endregion Messages
+}

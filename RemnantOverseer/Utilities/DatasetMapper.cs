@@ -1,0 +1,297 @@
+using lib.remnant2.analyzer.Model;
+using lib.remnant2.analyzer;
+using RemnantOverseer.Models.Enums;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+
+namespace RemnantOverseer.Utilities;
+internal class DatasetMapper
+{
+    public static MappedZones MapCharacterToZones(Character characterData)
+    {
+        var missingItemIds = characterData.Profile.MissingItems.Select(x => x["Id"]).ToHashSet(StringComparer.Ordinal);
+        var cassShopItemIds = characterData.Save.CassShop.Select(x => x.Id).ToHashSet(StringComparer.Ordinal);
+        var result = new MappedZones
+        {
+            CampaignZoneList = MapZonesToZones([.. characterData.Save.Campaign.Zones, characterData.Save.Campaign.Ward13], missingItemIds, cassShopItemIds, characterData.Save.Campaign.RespawnPoint)
+        };
+        if (characterData.Save.Adventure != null)
+        {
+            result.AdventureZoneList = MapZonesToZones([.. characterData.Save.Adventure.Zones, characterData.Save.Adventure.Ward13], missingItemIds, cassShopItemIds, characterData.Save.Adventure.RespawnPoint);
+        }
+        return result;
+    }
+
+    public static MappedCharacters MapCharacters(List<Character> characters)
+    {
+        var result = new MappedCharacters();
+        for (int index = 0; index < characters.Count; index++)
+        {
+            var character = characters[index];
+            var mappedCharacter = MapCharacter(character, index);
+            result.CharacterList.Add(mappedCharacter);
+        }
+
+        // Just in case
+        result.CharacterList = [.. result.CharacterList.OrderBy((m) => m.Index)];
+
+        return result;
+    }
+
+    public static Models.Character MapCharacter(Character character, int index)
+    {
+        Enum.TryParse<Archetypes>(character.Profile.Archetype, true, out var archetype); // If false, will default to default value in enum, i.e. Unknown
+        Enum.TryParse<Archetypes>(character.Profile.SecondaryArchetype, true, out var subarchetype);
+        var equipment = new List<Models.Item>();
+        var skills = new List<Models.Item>();
+        var tools = new List<Models.Item>();
+        foreach (var i in character.Profile.Inventory.Where(i => i.IsEquipped && !i.IsTrait).OrderBy(i => i.EquippedSlot))
+        {
+            var info = ItemDb.GetItemByProfileId(i.ProfileId);
+            if (info?.Type == "engram") continue; // Already shown as the selected archetypes.
+            bool isFlashlight = i.ProfileId == "/Game/Items/Makeshift_Light/Item_Flashlight.Item_Flashlight_C";
+            var item = new Models.Item {
+                Id = isFlashlight ? "Item_Flashlight" : info?.Id ?? "",
+                CanonicalName = (isFlashlight ? "Flashlight" : info?.Name ?? "Невідомий предмет") + (i.Level is > 0 ? $" +{i.Level}" : ""),
+                EquipmentSlotName = i.EquippedSlot.ToString(),
+                PlaceholderLabel = info?.Type == "skill" ? "Іконка навички відсутня" : isFlashlight ? "Іконка ліхтарика відсутня" : "Іконка відсутня"
+            };
+            if (info?.Type == "skill") skills.Add(item);
+            else if (isFlashlight || info?.Type == "consumable") tools.Add(item);
+            else equipment.Add(item);
+        }
+        return new Models.Character
+        {
+            Index = index,
+            SaveSlot = character.Index,
+            TraitRank = character.Profile.TraitRank.ToString(),
+            TraitPoints = character.Profile.LastSavedTraitPoints.ToString(),
+            RelicCharges = character.Profile.RelicCharges.ToString(),
+            CampaignDifficulty = character.Save.Campaign.Difficulty.ToString(),
+            AdventureDifficulty = character.Save.Adventure?.Difficulty.ToString() ?? "не створена",
+            EquippedItems = equipment,
+            EquippedSkills = skills,
+            EquippedTools = tools,
+            Archetype = archetype,
+            SubArchetype = string.IsNullOrEmpty(character.Profile.SecondaryArchetype) ? null : subarchetype,
+            ObjectCount = character.Profile.AcquiredItems,
+            PowerLevel = character.Profile.ItemLevel, // Yes.
+            ActiveWorld = Enum.Parse<WorldTypes>(character.ActiveWorldSlot.ToString(), true),
+            IsHardcore = character.Profile.IsHardcore,
+            Playtime = character.Save.Playtime ?? TimeSpan.Zero
+        };
+    }
+
+    public static MappedMissingItems MapMissingItems(List<Dictionary<string, string>> missingItemsDict)
+    {
+        return MapMissingItems(missingItemsDict, []);
+    }
+
+    public static MappedMissingItems MapMissingItems(List<Dictionary<string, string>> missingItemsDict, IEnumerable<string> cassShopItemIds)
+    {
+        var result = new MappedMissingItems();
+        var cassShopItemIdSet = cassShopItemIds.ToHashSet(StringComparer.Ordinal);
+        foreach(var missingItem in missingItemsDict)
+        {
+            var lootItem = new LootItemExtended() { Properties = missingItem };
+            var item = MapLootItemToItem(lootItem);
+            item.IsInCassShop = cassShopItemIdSet.Contains(item.Id);
+            result.ItemCategoryList[(int)item.Type].Items.Add(item);
+        }
+
+        return result;
+    }
+
+    public static int GetActiveCharacterIndex(Dataset dataset)
+    {
+        // Can have gaps due to removed/dead characters, e.g. 0, 1, 3, 4
+        int[] indices = dataset.Characters.Select(c => c.Index).ToArray();
+        var activeIndex = Array.IndexOf(indices, dataset.ActiveCharacterIndex);
+        return activeIndex < 0 ? 0 : activeIndex;
+    }
+
+    public static Models.ThaenTree? MapThaenTree(Character character)
+    {
+        return character.Save.ThaenFruit is null ? null : new Models.ThaenTree()
+        {
+            GrowthStage = character.Save.ThaenFruit.GrowthStage,
+            Timestamp = character.Save.ThaenFruit.Timestamp,
+            HasFruit = character.Save.ThaenFruit.HasFruit,
+            PickedCount = character.Save.ThaenFruit.PickedCount
+        };
+    }
+
+    public static Models.BloodmoonInfo? GetBloodmoonInfo(RolledWorld? world)
+    {
+        if (world?.BloodMoon is null) return null;
+        return new Models.BloodmoonInfo
+        {
+            CurrentChance = world.BloodMoon.CurrentChance,
+            // Save file timestamps are in GMT; mark them explicitly so local conversion works.
+            LastTriggeredTime = DateTime.SpecifyKind(world.BloodMoon.LastTriggeredTime, DateTimeKind.Utc),
+            LastCheckTime = DateTime.SpecifyKind(world.BloodMoon.LastCheckTime, DateTimeKind.Utc),
+            ZoneLoadCount = world.BloodMoon.ZoneLoadCount
+        };
+    }
+
+    private static List<Models.Zone> MapZonesToZones(List<Zone> zones, HashSet<string> missingItemIds, HashSet<string> cassShopItemIds, RespawnPoint? respawnPoint)
+    {
+        //var locnames = new List<string>();
+        //var subtypes = new List<string>();
+
+        var result = new List<Models.Zone>();
+        foreach (var zone in zones)
+        {
+            var zoneModel = new Models.Zone
+            {
+                Name = zone.Name,
+                Story = zone.Story,
+                Locations = []
+            };
+
+            // Map Locations
+            // TODO: Consider nesting locations
+            foreach (var location in zone.Locations)
+            {
+                //locnames.Add(location.Name);
+                var locationModel = new Models.Location
+                {
+                    Name = location.Name,
+                    Items = [],
+                    IsSimulacrumPresent = location.Simulacrum,
+                    IsSimulacrumLooted = location.SimulacrumLooted,
+                    IsTraitBookPresent = location.TraitBook,
+                    IsTraitBookLooted = location.TraitBookLooted,
+                    CanonicalConnections = location.Connections,
+
+                    // not supported yet
+                    IsBloodmoon = location.Bloodmoon
+                };
+
+                // Map Items
+                foreach (var lootGroup in location.LootGroups)
+                {
+                    foreach (var item in lootGroup.Items)
+                    {
+                        //if (item.Properties.TryGetValue("Subtype", out string? value) && !subtypes.Contains(value))
+                        //{
+                        //    subtypes.Add(value);
+                        //}
+                        var itemModel = MapLootItemToItem(item, lootGroup, !missingItemIds.Contains(item.Id), cassShopItemIds);
+                        // if (itemModel.OriginName.Equals("Oracle's Refuge")) locationModel.IsOracleLocation = true;
+                        itemModel.WorldName = zone.Name;
+                        itemModel.LocationName = location.Name;
+                        locationModel.Items.Add(itemModel);
+                    }
+                }
+
+                // Respawn point checks
+                if (respawnPoint != null && respawnPoint.Type != lib.remnant2.analyzer.Enums.RespawnPointType.None)
+                {
+                    switch (respawnPoint.Type)
+                    {
+                        case lib.remnant2.analyzer.Enums.RespawnPointType.WorldStone:
+                            if (location.WorldStones.Contains(respawnPoint.Name))
+                            {
+                                SetAsRespawnLocation(locationModel, respawnPoint);
+                            }
+                            break;
+                        case lib.remnant2.analyzer.Enums.RespawnPointType.Checkpoint:
+                            if (location.Name == respawnPoint.Name)
+                            {
+                                SetAsRespawnLocation(locationModel, respawnPoint);
+                            }
+                            break;
+                        case lib.remnant2.analyzer.Enums.RespawnPointType.ZoneTransition:
+                            var name = respawnPoint.Name.Split("/")[0];
+                            if (location.Name == name)
+                            {
+                                SetAsRespawnLocation(locationModel, respawnPoint);
+                            }
+                            break;
+                    }
+                }
+
+                zoneModel.Locations.Add(locationModel);
+            }
+
+            result.Add(zoneModel);
+        }
+
+        //var t = locnames;
+        //var s = subtypes;
+        return result;
+    }
+
+    private static Models.Item MapLootItemToItem(LootItemExtended lootItem)
+    {
+        Enum.TryParse<ItemTypes>(lootItem.Type.Replace("_", ""), true, out var itemType); // If false, will default to default value in enum, aka Unknown
+        var itemModel = new Models.Item
+        {
+            Id = lootItem.Id,
+            CanonicalName = lootItem.Name,
+            Description = lootItem.ItemNotes,
+            IsLooted = lootItem.IsLooted,
+            IsPrerequisiteMissing = lootItem.IsPrerequisiteMissing,
+            HasRequiredMaterial = lootItem.HasRequiredMaterial,
+            Type = itemType,
+            IsCoop = lootItem.Properties.ContainsKey("Coop") && lootItem.Properties["Coop"] == "True",
+            IsAccountAward = lootItem.IsVendoredAccountAward
+        };
+
+        return itemModel;
+    }
+
+    private static Models.Item MapLootItemToItem(LootItemExtended lootItem, LootGroup lootGroup, bool isDuplicate, HashSet<string> cassShopItemIds)
+    {
+        var itemModel = MapLootItemToItem(lootItem);
+
+        Enum.TryParse<OriginTypes>(lootGroup.Type.Replace(" ", ""), true, out var originType);
+        itemModel.OriginType = originType;
+        itemModel.CanonicalOriginName = lootGroup.Name ?? string.Empty;
+        itemModel.OriginId = originType == OriginTypes.Vendor ? itemModel.CanonicalOriginName : lootGroup.EventDropReference ?? string.Empty;
+        itemModel.IsDuplicate = isDuplicate;
+        itemModel.IsInCassShop = originType == OriginTypes.Vendor
+            && string.Equals(lootGroup.Name, "Cass", StringComparison.Ordinal)
+            && cassShopItemIds.Contains(lootItem.Id);
+
+        if(itemModel.Type == ItemTypes.Weapon)
+        {
+            itemModel.WeaponSubtype = WeaponSubtypesExtensions.FromFriendlyString(lootItem.Properties["Subtype"]);
+        }
+
+        return itemModel;
+    }
+
+    private static void SetAsRespawnLocation(Models.Location locationModel, RespawnPoint respawnPoint)
+    {
+        locationModel.IsRespawnLocation = true;
+        locationModel.RespawnPointName = respawnPoint.Name;
+        locationModel.RespawnPointType = Enum.Parse<RespawnPointType>(respawnPoint.Type.ToString(), true);
+    }
+}
+
+internal class MappedZones
+{
+    public List<Models.Zone> CampaignZoneList { get; set; } = [];
+    public List<Models.Zone> AdventureZoneList { get; set; } = [];
+}
+
+internal class MappedCharacters
+{
+    public List<Models.Character> CharacterList { get; set; } = [];
+}
+
+internal class MappedMissingItems
+{
+    public List<Models.ItemCategory> ItemCategoryList { get; set; } = [];
+
+    public MappedMissingItems()
+    {
+        foreach(var type in Enum.GetValues<ItemTypes>())
+        {
+            ItemCategoryList.Add(new Models.ItemCategory() { Type = type });
+        }
+    }
+}

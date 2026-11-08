@@ -1,0 +1,116 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:RemnantOverseer.ViewModels"
+             xmlns:models="using:RemnantOverseer.Models"
+             xmlns:controls="using:RemnantOverseer.Controls"
+             xmlns:util="using:RemnantOverseer.Utilities"
+             x:Class="RemnantOverseer.Views.CharacterSelectView"
+             x:DataType="vm:CharacterSelectViewModel">
+  <UserControl.Resources>
+    <util:ArchetypeToImageConverter x:Key="ArchetypeToImageConverter" />
+    <util:ArchetypeToBackgroundConverter x:Key="ArchetypeToBackgroundConverter" />
+  </UserControl.Resources>
+  <Grid Margin="26,20">
+    <ListBox ItemsSource="{Binding Characters}" Background="Transparent" BorderThickness="0"
+             ScrollViewer.VerticalScrollBarVisibility="Auto" ScrollViewer.HorizontalScrollBarVisibility="Disabled">
+      <ListBox.Styles>
+        <Style Selector="ListBoxItem"><Setter Property="HorizontalContentAlignment" Value="Stretch" /><Setter Property="Background" Value="Transparent" /></Style>
+        <Style Selector="ListBoxItem:selected /template/ ContentPresenter"><Setter Property="Background" Value="Transparent" /><Setter Property="BorderBrush" Value="Transparent" /></Style>
+        <Style Selector="ListBoxItem:pointerover /template/ ContentPresenter"><Setter Property="Background" Value="Transparent" /></Style>
+      </ListBox.Styles>
+      <ListBox.ItemsPanel><ItemsPanelTemplate><StackPanel Spacing="18" HorizontalAlignment="Stretch" /></ItemsPanelTemplate></ListBox.ItemsPanel>
+      <ListBox.ItemTemplate>
+        <DataTemplate x:DataType="models:Character">
+          <Border Background="#141820" BorderBrush="#39404C" BorderThickness="1" CornerRadius="12" Padding="24" MaxWidth="1120" HorizontalAlignment="Stretch">
+            <StackPanel Spacing="20">
+              <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="22">
+                <Grid Grid.Column="0" ColumnDefinitions="*,*" Width="160" Height="160" ClipToBounds="True">
+                  <Border Grid.Column="0" Background="{Binding Archetype, Converter={StaticResource ArchetypeToBackgroundConverter}}" CornerRadius="8,0,0,8" />
+                  <Border Grid.Column="1" Background="{Binding SubArchetype, Converter={StaticResource ArchetypeToBackgroundConverter}}" CornerRadius="0,8,8,0" />
+                  <Image Grid.Column="0" Source="{Binding Archetype, Converter={StaticResource ArchetypeToImageConverter}}" Stretch="UniformToFill" />
+                  <Image Grid.Column="1" Source="{Binding SubArchetype, Converter={StaticResource ArchetypeToImageConverter}}" Stretch="UniformToFill" />
+                </Grid>
+                <StackPanel Grid.Column="1" VerticalAlignment="Center" Spacing="6">
+                  <TextBlock Text="ПЕРСОНАЖ" FontSize="12" FontWeight="Bold" Foreground="#E6A563" />
+                  <TextBlock Text="{Binding ArchetypeName}" FontSize="29" FontWeight="Bold" />
+                  <TextBlock Text="{Binding SubArchetypeName}" FontSize="19" Foreground="#BFC9D3" />
+                  <TextBlock Text="{Binding SaveSlotLabel}" FontSize="13" Foreground="#9BA7B5" />
+                  <TextBlock Text="{Binding HardcoreLabel}" FontSize="13" Foreground="#9BA7B5" />
+                </StackPanel>
+                <StackPanel Grid.Column="2" VerticalAlignment="Center" HorizontalAlignment="Center" Spacing="4">
+                  <TextBlock Text="СИЛА" FontSize="12" Foreground="#9BA7B5" HorizontalAlignment="Center" />
+                  <TextBlock Text="{Binding FormattedPowerLevel}" FontSize="38" FontWeight="Bold" Foreground="#E6A563" HorizontalAlignment="Center" />
+                  <Button Content="Обрати персонажа" Command="{Binding $parent[ListBox].((vm:CharacterSelectViewModel)DataContext).CharacterSelected}" CommandParameter="{Binding}" />
+                </StackPanel>
+              </Grid>
+              <Grid ColumnDefinitions="*,*,*,*" ColumnSpacing="10">
+                <Border Grid.Column="0" Background="#202630" CornerRadius="7" Padding="13"><StackPanel Spacing="4"><TextBlock Text="ЧАС У ГРІ" Foreground="#9BA7B5" FontSize="11"/><TextBlock Text="{Binding FormattedPlaytime}" FontSize="18" FontWeight="SemiBold"/></StackPanel></Border>
+                <Border Grid.Column="1" Background="#202630" CornerRadius="7" Padding="13"><StackPanel Spacing="4"><TextBlock Text="КОЛЕКЦІЯ" Foreground="#9BA7B5" FontSize="11"/><TextBlock Text="{Binding ObjectCount, StringFormat='{}{0} предметів'}" FontSize="18" FontWeight="SemiBold"/></StackPanel></Border>
+                <Border Grid.Column="2" Background="#202630" CornerRadius="7" Padding="13"><StackPanel Spacing="4"><TextBlock Text="РИСИ" Foreground="#9BA7B5" FontSize="11"/><TextBlock Text="{Binding TraitRank, StringFormat='Ранг {0}'}" FontSize="18" FontWeight="SemiBold"/></StackPanel></Border>
+                <Border Grid.Column="3" Background="#202630" CornerRadius="7" Padding="13"><StackPanel Spacing="4"><TextBlock Text="РЕЛІКВІЯ" Foreground="#9BA7B5" FontSize="11"/><TextBlock Text="{Binding RelicCharges, StringFormat='Заряди: {0}'}" FontSize="18" FontWeight="SemiBold"/></StackPanel></Border>
+              </Grid>
+              <Grid ColumnDefinitions="*,*" ColumnSpacing="10">
+                <Border Grid.Column="0" Background="#202630" CornerRadius="7" Padding="12"><TextBlock Text="{Binding CampaignLabel}" FontSize="15" /></Border>
+                <Border Grid.Column="1" Background="#202630" CornerRadius="7" Padding="12"><TextBlock Text="{Binding AdventureLabel}" FontSize="15" /></Border>
+              </Grid>
+              <StackPanel Spacing="10">
+                <TextBlock Text="СПОРЯДЖЕННЯ" FontSize="13" FontWeight="Bold" Foreground="#E6A563" />
+                <ItemsControl ItemsSource="{Binding EquippedItems}">
+                  <ItemsControl.ItemsPanel><ItemsPanelTemplate><WrapPanel /></ItemsPanelTemplate></ItemsControl.ItemsPanel>
+                  <ItemsControl.ItemTemplate>
+                    <DataTemplate x:DataType="models:Item">
+                      <Border Width="160" Height="128" Margin="0,0,10,10" Background="#202630" BorderBrush="#343C48" BorderThickness="1" CornerRadius="8" Padding="8">
+                        <StackPanel Spacing="4">
+                          <Panel Height="65">
+                            <TextBlock Text="{Binding PlaceholderLabel}" TextWrapping="Wrap" FontSize="11" Foreground="#9BA7B5" TextAlignment="Center" VerticalAlignment="Center" HorizontalAlignment="Center" IsVisible="{Binding !HasThumbnail}" />
+                            <Image Source="{Binding Thumbnail}" Width="64" Height="64" Stretch="Uniform" />
+                          </Panel>
+                          <TextBlock Text="{Binding CanonicalName}" FontSize="12" FontWeight="Medium" TextWrapping="Wrap" MaxHeight="36" TextAlignment="Center" TextTrimming="CharacterEllipsis" />
+                        </StackPanel>
+                      </Border>
+                    </DataTemplate>
+                  </ItemsControl.ItemTemplate>
+                </ItemsControl>
+                <TextBlock Text="НАВИЧКИ" FontSize="13" FontWeight="Bold" Foreground="#E6A563" Margin="0,8,0,0" IsVisible="{Binding HasEquippedSkills}" />
+                <ItemsControl ItemsSource="{Binding EquippedSkills}">
+                  <ItemsControl.ItemsPanel><ItemsPanelTemplate><WrapPanel /></ItemsPanelTemplate></ItemsControl.ItemsPanel>
+                  <ItemsControl.ItemTemplate>
+                    <DataTemplate x:DataType="models:Item">
+                      <Border Width="160" Height="128" Margin="0,0,10,10" Background="#202630" BorderBrush="#343C48" BorderThickness="1" CornerRadius="8" Padding="8">
+                        <StackPanel Spacing="4">
+                          <Panel Height="65">
+                            <TextBlock Text="{Binding PlaceholderLabel}" TextWrapping="Wrap" FontSize="11" Foreground="#9BA7B5" TextAlignment="Center" VerticalAlignment="Center" HorizontalAlignment="Center" IsVisible="{Binding !HasThumbnail}" />
+                            <Image Source="{Binding Thumbnail}" Width="64" Height="64" Stretch="Uniform" />
+                          </Panel>
+                          <TextBlock Text="{Binding CanonicalName}" FontSize="12" FontWeight="Medium" TextWrapping="Wrap" MaxHeight="36" TextAlignment="Center" TextTrimming="CharacterEllipsis" />
+                        </StackPanel>
+                      </Border>
+                    </DataTemplate>
+                  </ItemsControl.ItemTemplate>
+                </ItemsControl>
+                <TextBlock Text="ІНСТРУМЕНТИ ТА ОСТАННІЙ ВИКОРИСТАНИЙ" FontSize="13" FontWeight="Bold" Foreground="#E6A563" Margin="0,8,0,0" IsVisible="{Binding HasEquippedTools}" />
+                <ItemsControl ItemsSource="{Binding EquippedTools}">
+                  <ItemsControl.ItemsPanel><ItemsPanelTemplate><WrapPanel /></ItemsPanelTemplate></ItemsControl.ItemsPanel>
+                  <ItemsControl.ItemTemplate>
+                    <DataTemplate x:DataType="models:Item">
+                      <Border Width="160" Height="128" Margin="0,0,10,10" Background="#202630" BorderBrush="#343C48" BorderThickness="1" CornerRadius="8" Padding="8">
+                        <StackPanel Spacing="4">
+                          <Panel Height="65">
+                            <TextBlock Text="{Binding PlaceholderLabel}" TextWrapping="Wrap" FontSize="11" Foreground="#9BA7B5" TextAlignment="Center" VerticalAlignment="Center" HorizontalAlignment="Center" IsVisible="{Binding !HasThumbnail}" />
+                            <Image Source="{Binding Thumbnail}" Width="64" Height="64" Stretch="Uniform" />
+                          </Panel>
+                          <TextBlock Text="{Binding CanonicalName}" FontSize="12" FontWeight="Medium" TextWrapping="Wrap" MaxHeight="36" TextAlignment="Center" TextTrimming="CharacterEllipsis" />
+                        </StackPanel>
+                      </Border>
+                    </DataTemplate>
+                  </ItemsControl.ItemTemplate>
+                </ItemsControl>
+              </StackPanel>
+            </StackPanel>
+          </Border>
+        </DataTemplate>
+      </ListBox.ItemTemplate>
+    </ListBox>
+    <controls:LoadingIndicator IsLoading="{Binding IsLoading}" />
+  </Grid>
+</UserControl>

@@ -1,0 +1,15 @@
+<ResourceDictionary xmlns="https://github.com/avaloniaui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:sys="using:System"
+                    xmlns:converters="using:Avalonia.Controls.Converters">
+
+  <SolidColorBrush x:Key="GlobalBackroundBrush" Color="{StaticResource GlobalBackroundColor}" />
+  <SolidColorBrush x:Key="OuterBorderBrush" Color="{StaticResource OuterBorderColor}" />
+  <SolidColorBrush x:Key="OuterBorderInactiveBrush" Color="{StaticResource OuterBorderInactiveColor}" />
+  <SolidColorBrush x:Key="InnerBorderBrush" Color="{StaticResource InnerBorderColor}" />
+  <SolidColorBrush x:Key="BaseAccentHighBrush" Color="{StaticResource BaseAccentColor}" Opacity="0.8" />
+  <SolidColorBrush x:Key="BaseAccentMediumBrush" Color="{StaticResource BaseAccentColor}" Opacity="0.6" />
+  <SolidColorBrush x:Key="BaseAccentLowBrush" Color="{StaticResource BaseAccentColor}" Opacity="0.4" />
+  <SolidColorBrush x:Key="BaseAccentTransparentBrush" Color="{StaticResource BaseAccentColor}" Opacity="0" />
+
+</ResourceDictionary>

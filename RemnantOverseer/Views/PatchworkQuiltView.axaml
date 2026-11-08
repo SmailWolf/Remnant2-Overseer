@@ -1,0 +1,49 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:vm="using:RemnantOverseer.ViewModels"
+             xmlns:loc="using:RemnantOverseer.Services"
+             mc:Ignorable="d" d:DesignWidth="500" d:DesignHeight="500"
+             x:Class="RemnantOverseer.Views.PatchworkQuiltView"
+             x:DataType="vm:PatchworkQuiltViewModel">
+
+  <Grid RowDefinitions="Auto, *">
+    <TextBlock Grid.Row="0" HorizontalAlignment="Center"
+               FontWeight="DemiBold" FontSize="16" Margin="10 10 10 0"
+               Text="{loc:Loc Patchwork_Title}"/>
+    <ItemsControl Grid.Row="1" HorizontalAlignment="Center" Width="306" Margin="10 10 10 10"
+                  ItemsSource="{Binding QuiltPatches, Mode=OneWay}">
+      <ItemsControl.ItemsPanel>
+        <ItemsPanelTemplate>
+          <WrapPanel Orientation="Horizontal" />
+        </ItemsPanelTemplate>
+      </ItemsControl.ItemsPanel>
+      <ItemsControl.ItemTemplate>
+        <DataTemplate x:DataType="vm:QuiltPatch">
+          <Grid ToolTip.Tip="{Binding Name, Mode=OneWay}" ToolTip.Placement="Top">
+            <!-- Why? -->
+            <!-- https://stackoverflow.com/questions/78082544/create-dashed-border-in-avalonia-11 -->
+            <Rectangle StrokeDashArray="4, 2" Stroke="{StaticResource QuiltBorderColor}" StrokeThickness="4" StrokeLineCap="Round"
+                       RadiusX="5" RadiusY="5"
+                       Fill="Transparent" Margin="2"
+                       IsVisible="{Binding !IsCompleted, Mode=OneWay}"/>
+            <Rectangle Stroke="{StaticResource QuiltBorderColor}" StrokeThickness="4"
+                       RadiusX="5" RadiusY="5"
+                       Fill="Transparent" Margin="2"
+                       IsVisible="{Binding IsCompleted, Mode=OneWay}"/>
+            <Border Margin="5" Width="92" Height="128">
+              <Image Source="{Binding Image}" Width="92" RenderOptions.BitmapInterpolationMode="HighQuality"
+                     IsVisible="{Binding IsCompleted, Mode=OneWay}">
+                <Image.Clip>
+                  <RectangleGeometry Rect="0,0,92,128" RadiusX="5" RadiusY="5" />
+                </Image.Clip>
+              </Image>
+            </Border>
+          </Grid>
+        </DataTemplate>
+      </ItemsControl.ItemTemplate>
+    </ItemsControl>
+  </Grid>
+
+</UserControl>

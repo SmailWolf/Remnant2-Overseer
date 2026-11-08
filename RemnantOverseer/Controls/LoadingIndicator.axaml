@@ -1,0 +1,41 @@
+<ResourceDictionary xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:li="using:LoadingIndicators.Avalonia"
+        xmlns:controls="using:RemnantOverseer.Controls">
+
+  <Design.PreviewWith>
+    <Grid Width="400" Height="400" Background="{DynamicResource SystemRegionBrush}">
+          <controls:LoadingIndicator IsLoading="True"/>
+    </Grid>
+  </Design.PreviewWith>
+
+  <ControlTheme x:Key="{x:Type controls:LoadingIndicator}" TargetType="controls:LoadingIndicator">
+    <Setter Property="Template">
+      <ControlTemplate>
+        <Border Name="LoadingContainer" Classes.loading="{TemplateBinding IsLoading}" Padding="16">
+          <!-- What? -->
+          <!-- https://stackoverflow.com/questions/77198873/datatrigger-to-start-animation-in-avalonia-ui -->
+          <Border.Transitions>
+            <Transitions>
+              <DoubleTransition Property="Opacity" Duration="0:0:1"/>
+            </Transitions>
+          </Border.Transitions>
+          <Border.Styles>
+            <Style Selector="Border#LoadingContainer">
+              <!-- If Background is not null, border acts as a hitstop even with 0 opacity -->
+              <Setter Property="Background" Value="{x:Null}" />
+              <Setter Property="Opacity" Value="0"/>
+            </Style>
+            <Style Selector="Border#LoadingContainer.loading">
+              <Setter Property="Background" Value="#CC000000" />
+              <Setter Property="Opacity" Value="1"/>
+            </Style>
+          </Border.Styles>
+          <Grid ColumnDefinitions="*, 96" RowDefinitions="*, 96">
+            <li:LoadingIndicator Grid.Column="1" Grid.Row="1" Foreground="{StaticResource BaseAccentColor}" BorderBrush="Transparent" BorderThickness="0" IsActive="True" Mode="Arcs" SpeedRatio="1.2" />
+          </Grid>
+        </Border>
+      </ControlTemplate>
+    </Setter>
+  </ControlTheme>
+</ResourceDictionary>

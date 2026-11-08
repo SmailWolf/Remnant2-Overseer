@@ -1,0 +1,290 @@
+<?xml version='1.0' encoding='utf-8'?>
+<root xmlns:ns1="urn:schemas-microsoft-com:xml-msdata" xmlns:xs="http://www.w3.org/2001/XMLSchema">
+  
+  <xs:schema id="root">
+    <xs:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xs:element name="root" ns1:IsDataSet="true">
+      <xs:complexType>
+        <xs:choice maxOccurs="unbounded">
+          <xs:element name="metadata">
+            <xs:complexType>
+              <xs:sequence>
+                <xs:element name="value" type="xsd:string" minOccurs="0" />
+              </xs:sequence>
+              <xs:attribute name="name" use="required" type="xsd:string" />
+              <xs:attribute name="type" type="xsd:string" />
+              <xs:attribute name="mimetype" type="xsd:string" />
+              <xs:attribute ref="xml:space" />
+            </xs:complexType>
+          </xs:element>
+          <xs:element name="assembly">
+            <xs:complexType>
+              <xs:attribute name="alias" type="xsd:string" />
+              <xs:attribute name="name" type="xsd:string" />
+            </xs:complexType>
+          </xs:element>
+          <xs:element name="data">
+            <xs:complexType>
+              <xs:sequence>
+                <xs:element name="value" type="xsd:string" minOccurs="0" ns1:Ordinal="1" />
+                <xs:element name="comment" type="xsd:string" minOccurs="0" ns1:Ordinal="2" />
+              </xs:sequence>
+              <xs:attribute name="name" type="xsd:string" use="required" ns1:Ordinal="1" />
+              <xs:attribute name="type" type="xsd:string" ns1:Ordinal="3" />
+              <xs:attribute name="mimetype" type="xsd:string" ns1:Ordinal="4" />
+              <xs:attribute ref="xml:space" />
+            </xs:complexType>
+          </xs:element>
+          <xs:element name="resheader">
+            <xs:complexType>
+              <xs:sequence>
+                <xs:element name="value" type="xsd:string" minOccurs="0" ns1:Ordinal="1" />
+              </xs:sequence>
+              <xs:attribute name="name" type="xsd:string" use="required" />
+            </xs:complexType>
+          </xs:element>
+        </xs:choice>
+      </xs:complexType>
+    </xs:element>
+  </xs:schema>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="Notification_TitleInformation" xml:space="preserve">
+    <value>Інформація</value>
+  </data>
+  <data name="Notification_TitleWarning" xml:space="preserve">
+    <value>Попередження</value>
+  </data>
+  <data name="Notification_TitleError" xml:space="preserve">
+    <value>Помилка</value>
+  </data>
+  <data name="DefaultLocationFound" xml:space="preserve">
+    <value>Папку збережень знайдено</value>
+  </data>
+  <data name="DefaultLocationNotFound" xml:space="preserve">
+    <value>Папку збережень не знайдено. Виберіть її в налаштуваннях</value>
+  </data>
+  <data name="Settings_ProfileFilePickerTitle" xml:space="preserve">
+    <value>Виберіть profile.sav або containers.index</value>
+  </data>
+  <data name="MainWindow_Characters" xml:space="preserve">
+    <value>Персонажі</value>
+  </data>
+  <data name="MainWindow_Items" xml:space="preserve">
+    <value>Предмети</value>
+  </data>
+  <data name="MainWindow_MissingItems" xml:space="preserve">
+    <value>Відсутні предмети</value>
+  </data>
+  <data name="MainWindow_Settings" xml:space="preserve">
+    <value>Налаштування</value>
+  </data>
+  <data name="Settings_SaveFileLocation" xml:space="preserve">
+    <value>Розташування збережень</value>
+  </data>
+  <data name="Settings_ChooseSaveFile" xml:space="preserve">
+    <value>Вибрати збереження</value>
+  </data>
+  <data name="Settings_EnableVersionChecking" xml:space="preserve">
+    <value>Перевіряти оновлення</value>
+  </data>
+  <data name="Settings_EnableLocationSpecificHints" xml:space="preserve">
+    <value>Показувати підказки локацій</value>
+  </data>
+  <data name="Settings_DisplayToolkitLinks" xml:space="preserve">
+    <value>Показувати посилання на Remnant Toolkit</value>
+  </data>
+  <data name="Settings_Language" xml:space="preserve">
+    <value>Мова</value>
+  </data>
+  <data name="Settings_LoggingAndDebug" xml:space="preserve">
+    <value>Журнал і діагностика</value>
+  </data>
+  <data name="Settings_OpenLog" xml:space="preserve">
+    <value>Відкрити журнал</value>
+  </data>
+  <data name="Settings_ExportSaveData" xml:space="preserve">
+    <value>Експортувати дані</value>
+  </data>
+  <data name="World_NothingLeftToCollect" xml:space="preserve">
+    <value>Усі відомі предмети зібрано</value>
+  </data>
+  <data name="World_Campaign" xml:space="preserve">
+    <value>Кампанія</value>
+  </data>
+  <data name="World_Adventure" xml:space="preserve">
+    <value>Пригода</value>
+  </data>
+  <data name="Common_CollapseAll" xml:space="preserve">
+    <value>Згорнути все</value>
+  </data>
+  <data name="Common_ExpandAll" xml:space="preserve">
+    <value>Розгорнути все</value>
+  </data>
+  <data name="Common_ResetFilters" xml:space="preserve">
+    <value>Скинути фільтри</value>
+  </data>
+  <data name="Common_SearchWatermark" xml:space="preserve">
+    <value>Пошук</value>
+  </data>
+  <data name="Common_SearchTooltip" xml:space="preserve">
+    <value>Пошук предметів або подій</value>
+  </data>
+  <data name="Common_Unknown" xml:space="preserve">
+    <value>Невідомо</value>
+  </data>
+  <data name="World_MoreFilters" xml:space="preserve">
+    <value>Більше фільтрів</value>
+  </data>
+  <data name="World_FilterLootedItems" xml:space="preserve">
+    <value>Зібрані предмети</value>
+  </data>
+  <data name="World_FilterMissingPrerequisites" xml:space="preserve">
+    <value>Предмети з невиконаними умовами</value>
+  </data>
+  <data name="World_TraitBookAvailable" xml:space="preserve">
+    <value>Доступна книга рис</value>
+  </data>
+  <data name="World_SimulacrumAvailable" xml:space="preserve">
+    <value>Доступний симулякр</value>
+  </data>
+  <data name="Item_ClickWiki" xml:space="preserve">
+    <value>Відкрити вікі</value>
+  </data>
+  <data name="Item_ClickTranslateNote" xml:space="preserve">
+    <value>Відкрити переклад</value>
+  </data>
+  <data name="Item_CoopRequired" xml:space="preserve">
+    <value>Потрібен кооператив</value>
+  </data>
+  <data name="Item_AccountWideUnlock" xml:space="preserve">
+    <value>Доступно всьому обліковому запису</value>
+  </data>
+  <data name="Character_PowerLevel" xml:space="preserve">
+    <value>Рівень сили</value>
+  </data>
+  <data name="Character_LevelFormat" xml:space="preserve">
+    <value>Рівень {0}</value>
+  </data>
+  <data name="Location_Connections" xml:space="preserve">
+    <value>Сусідні локації</value>
+  </data>
+  <data name="ItemType_Amulet" xml:space="preserve">
+    <value>Амулет</value>
+  </data>
+  <data name="ItemType_Amulet_Plural" xml:space="preserve">
+    <value>Амулети</value>
+  </data>
+  <data name="ItemType_Armor" xml:space="preserve">
+    <value>Броня</value>
+  </data>
+  <data name="ItemType_Armor_Plural" xml:space="preserve">
+    <value>Броня</value>
+  </data>
+  <data name="ItemType_Concoction" xml:space="preserve">
+    <value>Відвар</value>
+  </data>
+  <data name="ItemType_Concoction_Plural" xml:space="preserve">
+    <value>Відвари</value>
+  </data>
+  <data name="ItemType_Consumable" xml:space="preserve">
+    <value>Витратний предмет</value>
+  </data>
+  <data name="ItemType_Consumable_Plural" xml:space="preserve">
+    <value>Витратні предмети</value>
+  </data>
+  <data name="ItemType_Material" xml:space="preserve">
+    <value>Матеріал</value>
+  </data>
+  <data name="ItemType_Material_Plural" xml:space="preserve">
+    <value>Матеріали</value>
+  </data>
+  <data name="ItemType_Mod" xml:space="preserve">
+    <value>Модифікатор</value>
+  </data>
+  <data name="ItemType_Mod_Plural" xml:space="preserve">
+    <value>Модифікатори</value>
+  </data>
+  <data name="ItemType_Mutator" xml:space="preserve">
+    <value>Мутатор</value>
+  </data>
+  <data name="ItemType_Mutator_Plural" xml:space="preserve">
+    <value>Мутатори</value>
+  </data>
+  <data name="ItemType_Prism" xml:space="preserve">
+    <value>Призма</value>
+  </data>
+  <data name="ItemType_Prism_Plural" xml:space="preserve">
+    <value>Призми</value>
+  </data>
+  <data name="ItemType_QuestItem" xml:space="preserve">
+    <value>Квестовий предмет</value>
+  </data>
+  <data name="ItemType_QuestItem_Plural" xml:space="preserve">
+    <value>Квестові предмети</value>
+  </data>
+  <data name="ItemType_Relic" xml:space="preserve">
+    <value>Реліквія</value>
+  </data>
+  <data name="ItemType_Relic_Plural" xml:space="preserve">
+    <value>Реліквії</value>
+  </data>
+  <data name="ItemType_Ring" xml:space="preserve">
+    <value>Перстень</value>
+  </data>
+  <data name="ItemType_Ring_Plural" xml:space="preserve">
+    <value>Персні</value>
+  </data>
+  <data name="ItemType_Trait" xml:space="preserve">
+    <value>Риса</value>
+  </data>
+  <data name="ItemType_Trait_Plural" xml:space="preserve">
+    <value>Риси</value>
+  </data>
+  <data name="ItemType_Weapon" xml:space="preserve">
+    <value>Зброя</value>
+  </data>
+  <data name="ItemType_Weapon_Plural" xml:space="preserve">
+    <value>Зброя</value>
+  </data>
+  <data name="WeaponSubtype_LongGun" xml:space="preserve">
+    <value>Довга зброя</value>
+  </data>
+  <data name="WeaponSubtype_HandGun" xml:space="preserve">
+    <value>Коротка зброя</value>
+  </data>
+  <data name="WeaponSubtype_MeleeWeapon" xml:space="preserve">
+    <value>Ближній бій</value>
+  </data>
+  <data name="OriginType_Location" xml:space="preserve">
+    <value>Локація</value>
+  </data>
+  <data name="OriginType_Vendor" xml:space="preserve">
+    <value>Торговець</value>
+  </data>
+  <data name="OriginType_Boss" xml:space="preserve">
+    <value>Бос</value>
+  </data>
+  <data name="OriginType_Dungeon" xml:space="preserve">
+    <value>Підземелля</value>
+  </data>
+  <data name="OriginType_Injectable" xml:space="preserve">
+    <value>Подія</value>
+  </data>
+  <data name="OriginType_WorldDrop" xml:space="preserve">
+    <value>Здобич світу</value>
+  </data>
+  <data name="OriginType_Miniboss" xml:space="preserve">
+    <value>Мінібос</value>
+  </data>
+  </root>
