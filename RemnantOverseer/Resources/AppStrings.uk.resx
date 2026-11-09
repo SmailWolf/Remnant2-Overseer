@@ -147,7 +147,10 @@
     <value>Більше фільтрів</value>
   </data>
   <data name="World_FilterLootedItems" xml:space="preserve">
-    <value>Зібрані предмети</value>
+    <value>Показувати вже зібрані предмети</value>
+  </data>
+  <data name="Location_RemainingBosses" xml:space="preserve">
+    <value>Ще не переможені боси: {0}</value>
   </data>
   <data name="World_FilterMissingPrerequisites" xml:space="preserve">
     <value>Предмети з невиконаними умовами</value>

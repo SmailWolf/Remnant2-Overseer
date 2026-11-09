@@ -435,7 +435,7 @@ public partial class WorldViewModel : ViewModelBase
     // Updating the file three times in a row is... le bad? Maybe.
     private void ResetAdditionalFilters()
     {
-        HideLootedItems = false;
+        HideLootedItems = true;
         HideMissingPrerequisiteItems = false;
         HideHasRequiredMaterialItems = false;
     }

@@ -18,6 +18,11 @@ public class Location : ObservableObject
         set => CanonicalName = value.Trim();
     }
     public List<Item> Items { get; set; } = [];
+    public List<string> RemainingBossNames { get; set; } = [];
+    public bool HasRemainingBosses => RemainingBossNames.Count > 0;
+    public string RemainingBossSummary => LocalizationService.Format(
+        "Location_RemainingBosses",
+        string.Join(", ", RemainingBossNames.Select(name => LocalizationService.GameString(name, name))));
     public bool IsTraitBookPresent { get; set; }
     public bool IsSimulacrumPresent { get; set; }
     public bool IsTraitBookLooted { get; set; }

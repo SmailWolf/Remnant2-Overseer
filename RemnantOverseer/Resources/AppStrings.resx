@@ -259,6 +259,9 @@ Make sure that settings are accurate and restart the application</value>
   <data name="World_FilterLootedItems" xml:space="preserve">
     <value>Looted items</value>
   </data>
+  <data name="Location_RemainingBosses" xml:space="preserve">
+    <value>Bosses not yet defeated: {0}</value>
+  </data>
   <data name="World_FilterMissingPrerequisites" xml:space="preserve">
     <value>Items with missing Prerequisites</value>
   </data>

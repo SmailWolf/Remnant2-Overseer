@@ -159,6 +159,7 @@ internal class DatasetMapper
                 {
                     Name = location.Name,
                     Items = [],
+                    RemainingBossNames = GetRemainingBossNames(location),
                     IsSimulacrumPresent = location.Simulacrum,
                     IsSimulacrumLooted = location.SimulacrumLooted,
                     IsTraitBookPresent = location.TraitBook,
@@ -222,6 +223,19 @@ internal class DatasetMapper
         //var t = locnames;
         //var s = subtypes;
         return result;
+    }
+
+    private static List<string> GetRemainingBossNames(lib.remnant2.analyzer.Model.Location location)
+    {
+        return location.DropReferences
+            .Where(reference => !reference.IsLooted)
+            .Select(reference => ItemDb.GetItemByIdOrDefault(reference.Name))
+            .Where(item => item is not null
+                && item.Properties.TryGetValue("Subtype", out var subtype)
+                && subtype is "boss" or "miniboss")
+            .Select(item => item!.Name)
+            .Distinct(StringComparer.Ordinal)
+            .ToList();
     }
 
     private static Models.Item MapLootItemToItem(LootItemExtended lootItem)

@@ -203,11 +203,11 @@
 
             <TreeDataTemplate DataType="models:Location" ItemsSource="{Binding Items}">
               <Grid ColumnDefinitions="Auto, Auto, *">
-                <Grid Grid.Column="0" ColumnDefinitions="*, Auto">
-                  <TextBlock Grid.Column="0" Margin="5,0,5,0" Text="{Binding Name}"/>
+                <StackPanel Grid.Column="0" Spacing="0">
+                  <TextBlock Margin="5,0,5,0" Text="{Binding Name}"/>
+                  <TextBlock Margin="5,0,5,2" FontSize="12" Opacity="0.8" Text="{Binding RemainingBossSummary}" IsVisible="{Binding HasRemainingBosses}"/>
                   <!-- Need to map 131 files for this to work :( -->
-                  <!--<PathIcon Grid.Column="1" Data="{StaticResource ImageIcon}" Margin="5 0"/>-->
-                </Grid>
+                </StackPanel>
                 <Grid Grid.Column="1" ColumnDefinitions="Auto, Auto, Auto, Auto, Auto">
                   <PathIcon Grid.Column="0" Data="{StaticResource ConnectionsIcon}" IsVisible="{Binding HasConnections}" ToolTip.Tip="{Binding FormattedConnections}" Margin="5 0"/>
                   <PathIcon Grid.Column="1" Data="{StaticResource TraitBookIcon}" IsVisible="{Binding IsTraitBookPresent}" IsEnabled="{Binding !IsTraitBookLooted}" ToolTip.Tip="{loc:Loc World_TraitBookAvailable}" Margin="5 0"/>
